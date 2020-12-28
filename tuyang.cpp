@@ -194,8 +194,13 @@ TUYANG_API int ty_cameraGetDepthImageHeight()
 	return DEPTH_IMG_HEIGHT;
 }
 
+TUYANG_API int		ty_cameraSendSofTriggerSig(int idx)
+{
+	return TYSendSoftTrigger(cams[idx].hDev);
+}
+
 //RGBÍ¼ÏñÐ£Õý:
-TUYANG_API void ty_cameraGetUndistortRGBImage(char* pRGB, int width, int height, int num, char* pOut)
+TUYANG_API void ty_cameraGetUndistortRGBImage(char* pRGB, int width, int height, int idx, char* pOut)
 {
 	TY_IMAGE_DATA src;
     src.width = width;
@@ -211,7 +216,7 @@ TUYANG_API void ty_cameraGetUndistortRGBImage(char* pRGB, int width, int height,
     dst.buffer = pOut;
     dst.pixelFormat = TY_PIXEL_FORMAT_RGB;
 
-	ASSERT_OK(TYUndistortImage(&color_calib.at(num), &src, NULL, &dst));
+	ASSERT_OK(TYUndistortImage(&color_calib.at(idx), &src, NULL, &dst));
 }
 
 TUYANG_API void ty_cameraMapDepthImage2RGBCoordinate(unsigned short* depthIn, int src_width, int src_height, int dst_width, int dst_height, unsigned short* depthOut, int idx)

@@ -37,12 +37,12 @@ EXTERN_C TUYANG_API int ty_camera_init(bool trigger);
 EXTERN_C TUYANG_API int ty_cameraGetCnt(void);
 
 /// @brief  get 3d-camera sn number.
-/// @param  [in]		num     device number.
+/// @param  [in]		idx     device number.
 /// @retval percipio device sn.
 EXTERN_C TUYANG_API char* ty_cameraGetSN(int  idx);
 
 /// @brief  get 3d-camera depth calib-para.
-/// @param  [in]		num				device number.
+/// @param  [in]		idx				device number.
 /// @retval percipio device depth calib-para.
 EXTERN_C TUYANG_API int		ty_cameraGetDepthCalibIntrinsicWidth(int idx);
 EXTERN_C TUYANG_API int		ty_cameraGetDepthCalibIntrinsicHeight(int idx);
@@ -51,7 +51,7 @@ EXTERN_C TUYANG_API void	ty_cameraGetDepthCalibExtrinsic(int idx, float* fExtrin
 EXTERN_C TUYANG_API void	ty_cameraGetDepthCalibDistortion(int idx, float* fDistortion);
 
 /// @brief  get 3d-camera rgb calib-para.
-/// @param  [in]		num				device number.
+/// @param  [in]		idx				device number.
 /// @retval percipio device rgb calib-para.
 EXTERN_C TUYANG_API int		ty_cameraGetColorCalibIntrinsicWidth(int idx);
 EXTERN_C TUYANG_API int		ty_cameraGetColorCalibIntrinsicHeight(int idx);
@@ -64,6 +64,8 @@ EXTERN_C TUYANG_API int		ty_cameraGetRGBImageHeight();
 EXTERN_C TUYANG_API int		ty_cameraGetDepthImageWidth();
 EXTERN_C TUYANG_API int		ty_cameraGetDepthImageHeight();
 
+EXTERN_C TUYANG_API int		ty_cameraSendSofTriggerSig(int idx);
+
 EXTERN_C TUYANG_API bool	ty_camera_fetch_rgb_image(char* color, int idx);
 EXTERN_C TUYANG_API bool	ty_camera_fetch_depth_image(unsigned short* depth, int idx);
 EXTERN_C TUYANG_API bool	ty_camera_fetch_all_image(char* color, unsigned short* depth, int idx);
@@ -75,9 +77,9 @@ EXTERN_C TUYANG_API bool	ty_camera_fetch_all_image(char* color, unsigned short* 
 /// @param  [in]	pRGB          Source rgb image data.
 /// @param  [in]    width         Source image width.
 /// @param  [in]    height        Source image height.
-/// @param  [in]    num			  Device number.
+/// @param  [in]    idx			  Device number.
 /// @param  [out]   pOut		  Dest rgb image data.
-EXTERN_C TUYANG_API void ty_cameraGetUndistortRGBImage(char* pRGB, int width, int height, int num, char* pOut);
+EXTERN_C TUYANG_API void ty_cameraGetUndistortRGBImage(char* pRGB, int width, int height, int idx, char* pOut);
 
 EXTERN_C TUYANG_API void ty_cameraMapDepthImage2RGBCoordinate(unsigned short* depthIn, int src_width, int src_height, int dst_width, int dst_height, unsigned short* depthOut, int idx);
 
