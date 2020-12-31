@@ -52,7 +52,6 @@ while(True):
     
     FrameIdx+=1
 
-cv2.destroyAllWindows()
 lib.ty_camera_close()
 print("Main done!");
 
