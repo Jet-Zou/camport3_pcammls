@@ -2,7 +2,6 @@
 #include "common/common.hpp"
 #include "TYImageProc.h"
 
-//using namespace cv;
 
 static char buffer[1024*1024];
 struct CamInfo
@@ -24,6 +23,18 @@ std::vector<CamInfo> cams(1);//定义设备队列
 std::vector<TY_CAMERA_CALIB_INFO> depth_calib(1);//深度校正参数
 std::vector<TY_CAMERA_CALIB_INFO> color_calib(1);//彩色校正参数
 
+TUYANG_API void ty_camera_test(char* szString)
+{
+    LOGD("=======================================");
+    LOGD("%s", szString);
+    LOGD("=======================================");
+    return;
+}
+
+TUYANG_API void ty_camera_test_int(int interface)
+{
+    LOGD("Mode : %d", interface);
+}
 
 //相机初始化:
 TUYANG_API int ty_camera_init(bool trigger)
