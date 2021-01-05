@@ -24,7 +24,7 @@
 #define RGB_IMG_HEIGHT		960
 
 EXTERN_C TUYANG_API void ty_camera_test(char* szString);
-EXTERN_C TUYANG_API void ty_camera_test_int(int interface);
+EXTERN_C TUYANG_API void ty_camera_test_int(int _interface);
 
 EXTERN_C TUYANG_API int ty_camera_init(bool trigger);
 

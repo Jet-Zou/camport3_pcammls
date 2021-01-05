@@ -31,9 +31,9 @@ TUYANG_API void ty_camera_test(char* szString)
     return;
 }
 
-TUYANG_API void ty_camera_test_int(int interface)
+TUYANG_API void ty_camera_test_int(int _interface)
 {
-    LOGD("Mode : %d", interface);
+	LOGD("Mode : %d", _interface);
 }
 
 //相机初始化:
@@ -93,28 +93,33 @@ TUYANG_API int ty_camera_init(bool trigger)
 
 		 int32_t allComps;
         ASSERT_OK( TYGetComponentIDs(cams[count].hDev, &allComps) );
-        if(allComps & TY_COMPONENT_RGB_CAM){
-            LOGD("=== Has RGB camera, open RGB cam");//打开彩色相机
-            ASSERT_OK( TYEnableComponents(cams[count].hDev, TY_COMPONENT_RGB_CAM) );
-        }
-		
-		 LOGD("=== Configure components, open depth cam");
-        int componentIDs = TY_COMPONENT_DEPTH_CAM;
-        ASSERT_OK( TYEnableComponents(cams[count].hDev, componentIDs) );
+        
+		if (allComps & TY_COMPONENT_DEPTH_CAM){
+			LOGD("=== Has depth camera, open depth cam");//使能深度图  
+			ASSERT_OK(TYEnableComponents(cams[count].hDev, TY_COMPONENT_DEPTH_CAM));
+		}
 
+		if (allComps & TY_COMPONENT_RGB_CAM){
+			LOGD("=== Has RGB camera, open RGB cam");//使能彩色图
+			ASSERT_OK(TYEnableComponents(cams[count].hDev, TY_COMPONENT_RGB_CAM));
+		}
 
-        LOGD("=== Configure feature, set depth image resolution to 640x480.");//分辨率
-		int err = TY_STATUS_OK;
-		if((640 == DEPTH_IMG_WIDTH) && (480 == DEPTH_IMG_HEIGHT))
-			err = TYSetEnum(cams[count].hDev, TY_COMPONENT_DEPTH_CAM, TY_ENUM_IMAGE_MODE, TY_IMAGE_MODE_DEPTH16_640x480);
-		else if((1280 == DEPTH_IMG_WIDTH) && (960 == DEPTH_IMG_HEIGHT))
-			err = TYSetEnum(cams[count].hDev, TY_COMPONENT_DEPTH_CAM, TY_ENUM_IMAGE_MODE, TY_IMAGE_MODE_DEPTH16_1280x960);
-		else
-			ASSERT_OK(-1);
-		ASSERT(err == TY_STATUS_OK || err == TY_STATUS_NOT_PERMITTED);
-
-		LOGD("=== Configure feature, set rgb image resolution to 640x480.");
 		std::vector<TY_ENUM_ENTRY> image_mode_list;
+        LOGD("=== Configure feature, set depth image resolution.");//分辨率
+		ASSERT_OK(get_feature_enum_list(cams[count].hDev, TY_COMPONENT_DEPTH_CAM, TY_ENUM_IMAGE_MODE, image_mode_list));
+		for (uint32_t idx = 0; idx < image_mode_list.size(); idx++){
+			TY_ENUM_ENTRY &entry = image_mode_list[idx];
+			//try to select a vga resolution
+			LOGD("Get RGB sensor image size: %d %d", TYImageWidth(entry.value), TYImageHeight(entry.value));
+			if (TYImageWidth(entry.value) == DEPTH_IMG_WIDTH || TYImageHeight(entry.value) == DEPTH_IMG_WIDTH){
+				LOGD("Select RGB Image Mode: %s", entry.description);
+				int err = TYSetEnum(cams[count].hDev, TY_COMPONENT_DEPTH_CAM, TY_ENUM_IMAGE_MODE, entry.value);
+				ASSERT(err == TY_STATUS_OK || err == TY_STATUS_NOT_PERMITTED);
+				break;
+			}
+		}
+
+		LOGD("=== Configure feature, set rgb image resolution.");
         ASSERT_OK(get_feature_enum_list(cams[count].hDev, TY_COMPONENT_RGB_CAM, TY_ENUM_IMAGE_MODE, image_mode_list));
         for (uint32_t idx = 0; idx < image_mode_list.size(); idx++){
             TY_ENUM_ENTRY &entry = image_mode_list[idx];
@@ -321,6 +326,9 @@ TUYANG_API bool ty_camera_fetch_rgb_image(char* color, int idx)
 			printf("====color image info : %d %d\n", tempRGB.cols, tempRGB.rows);
 			memcpy(color, tempRGB.data, 3 * tempRGB.cols * tempRGB.rows);
 		}
+		else {
+			printf("====color image is empty!\n");
+		}
 
 		ASSERT_OK(TYEnqueueBuffer(cams[idx].hDev, cams[idx].frame.userBuffer, cams[idx].frame.bufferSize));
 
@@ -345,6 +353,9 @@ TUYANG_API bool ty_camera_fetch_depth_image(unsigned short* depth, int idx)
 			printf("====depth image info : %d %d\n", tempDepth.cols, tempDepth.rows);
 			memcpy(depth, tempDepth.data, 2 * tempDepth.cols * tempDepth.rows);
 		}
+		else {
+			printf("====depth image is empty!\n");
+		}
 
 		ASSERT_OK(TYEnqueueBuffer(cams[idx].hDev, cams[idx].frame.userBuffer, cams[idx].frame.bufferSize));
 		return true;
@@ -368,10 +379,16 @@ TUYANG_API bool ty_camera_fetch_all_image(char* color, unsigned short* depth, in
 			printf("====color image info : %d %d\n", tempRGB.cols, tempRGB.rows);
 			memcpy(color, tempRGB.data, 3 * tempRGB.cols * tempRGB.rows);
 		}
+		else {
+			printf("====color image is empty!\n");
+		}
 
 		if (!tempDepth.empty()){
 			printf("====depth image info : %d %d\n", tempDepth.cols, tempDepth.rows);
 			memcpy(depth, tempDepth.data, 2 * tempDepth.cols*tempDepth.rows);
+		}
+		else {
+			printf("====depth image is empty!\n");
 		}
 
 		ASSERT_OK(TYEnqueueBuffer(cams[idx].hDev, cams[idx].frame.userBuffer, cams[idx].frame.bufferSize));
