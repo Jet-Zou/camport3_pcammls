@@ -16,12 +16,11 @@ struct CamInfo
     CamInfo() : hDev(0) {}
 };
 
-uint32_t cam_size ;//相机数目
-std::vector<CamInfo> cams(1);//定义设备队列
+static uint32_t cam_size ;
+static std::vector<CamInfo> cams(1);
 
-//相机内外参数:
-std::vector<TY_CAMERA_CALIB_INFO> depth_calib(1);//深度校正参数
-std::vector<TY_CAMERA_CALIB_INFO> color_calib(1);//彩色校正参数
+static std::vector<TY_CAMERA_CALIB_INFO> depth_calib(1);//
+static std::vector<TY_CAMERA_CALIB_INFO> color_calib(1);//
 
 TUYANG_API void ty_camera_test(char* szString)
 {
@@ -36,7 +35,6 @@ TUYANG_API void ty_camera_test_int(int _interface)
 	LOGD("Mode : %d", _interface);
 }
 
-//相机初始化:
 TUYANG_API int ty_camera_init(bool trigger)
 {
 	int32_t deviceType = TY_INTERFACE_ALL;
@@ -44,16 +42,15 @@ TUYANG_API int ty_camera_init(bool trigger)
     
     int32_t found;
 
-	LOGD("=== Init lib");//初始化lib
+	LOGD("=== Init lib");//sdk lib init
     ASSERT_OK( TYInitLib() );
     TY_VERSION_INFO ver;
     ASSERT_OK( TYLibVersion(&ver) );
     LOGD("     - lib version: %d.%d.%d", ver.major, ver.minor, ver.patch);
 
-    std::vector<TY_DEVICE_BASE_INFO> selected;//选择设备
+    std::vector<TY_DEVICE_BASE_INFO> selected;
     ASSERT_OK( selectDevice(deviceType, "", "", 10, selected) );
     
-    //相机的数量
     if (list.size()) {
         cam_size = list.size();
     } else {
@@ -68,7 +65,6 @@ TUYANG_API int ty_camera_init(bool trigger)
     for(uint32_t i = 0; i < selected.size(); i++){
         if (list.size()) {
             found = 0; 
-			//检查相机
             for(uint32_t j = 0; j < list.size(); j++){
                LOGD("=== check device: %s, %s", selected[i].id, list[j]);
                if (strcmp(selected[i].id, list[j]) == 0) {
@@ -82,7 +78,7 @@ TUYANG_API int ty_camera_init(bool trigger)
                 continue;
             } 
         }
-		//打开相机
+
         LOGD("=== Open device: %s", selected[i].id);
         strncpy(cams[count].sn, selected[i].id, sizeof(cams[count].sn));
 
@@ -95,21 +91,20 @@ TUYANG_API int ty_camera_init(bool trigger)
         ASSERT_OK( TYGetComponentIDs(cams[count].hDev, &allComps) );
         
 		if (allComps & TY_COMPONENT_DEPTH_CAM){
-			LOGD("=== Has depth camera, open depth cam");//使能深度图  
+			LOGD("=== Has depth camera, open depth cam");//enable depth cam
 			ASSERT_OK(TYEnableComponents(cams[count].hDev, TY_COMPONENT_DEPTH_CAM));
 		}
 
 		if (allComps & TY_COMPONENT_RGB_CAM){
-			LOGD("=== Has RGB camera, open RGB cam");//使能彩色图
+			LOGD("=== Has RGB camera, open RGB cam");//enable rgb cam
 			ASSERT_OK(TYEnableComponents(cams[count].hDev, TY_COMPONENT_RGB_CAM));
 		}
 
 		std::vector<TY_ENUM_ENTRY> image_mode_list;
-        LOGD("=== Configure feature, set depth image resolution.");//分辨率
+        LOGD("=== Configure feature, set depth image resolution.");
 		ASSERT_OK(get_feature_enum_list(cams[count].hDev, TY_COMPONENT_DEPTH_CAM, TY_ENUM_IMAGE_MODE, image_mode_list));
 		for (uint32_t idx = 0; idx < image_mode_list.size(); idx++){
 			TY_ENUM_ENTRY &entry = image_mode_list[idx];
-			//try to select a vga resolution
 			LOGD("Get RGB sensor image size: %d %d", TYImageWidth(entry.value), TYImageHeight(entry.value));
 			if (TYImageWidth(entry.value) == DEPTH_IMG_WIDTH || TYImageHeight(entry.value) == DEPTH_IMG_WIDTH){
 				LOGD("Select RGB Image Mode: %s", entry.description);
@@ -123,7 +118,6 @@ TUYANG_API int ty_camera_init(bool trigger)
         ASSERT_OK(get_feature_enum_list(cams[count].hDev, TY_COMPONENT_RGB_CAM, TY_ENUM_IMAGE_MODE, image_mode_list));
         for (uint32_t idx = 0; idx < image_mode_list.size(); idx++){
             TY_ENUM_ENTRY &entry = image_mode_list[idx];
-            //try to select a vga resolution
 			LOGD("Get RGB sensor image size: %d %d", TYImageWidth(entry.value), TYImageHeight(entry.value));
             if (TYImageWidth(entry.value) == RGB_IMG_WIDTH || TYImageHeight(entry.value) == RGB_IMG_WIDTH){
                 LOGD("Select RGB Image Mode: %s", entry.description);
@@ -133,13 +127,13 @@ TUYANG_API int ty_camera_init(bool trigger)
             }
         }
 
-        LOGD("=== Prepare image buffer");//帧缓存
+        LOGD("=== Prepare image buffer");
         uint32_t frameSize;
         ASSERT_OK( TYGetFrameBufferSize(cams[count].hDev, &frameSize) );
         LOGD("     - Get size of framebuffer, %d", frameSize);
 	    ASSERT( frameSize >= DEPTH_IMG_WIDTH*DEPTH_IMG_HEIGHT*2 );
 
-        LOGD("     - Allocate & enqueue buffers");//双缓存
+        LOGD("     - Allocate & enqueue buffers");
         cams[count].fb[0].resize(frameSize);
         cams[count].fb[1].resize(frameSize);
         LOGD("     - Enqueue buffer (%p, %d)", cams[count].fb[0].data(), frameSize);
@@ -160,12 +154,15 @@ TUYANG_API int ty_camera_init(bool trigger)
        // LOGD("=== Register event callback");
         //ASSERT_OK(TYRegisterEventCallback(cams[count].hDev, eventCallback, NULL));
 
-        LOGD("=== Disable trigger mode");
         TY_TRIGGER_PARAM para;
-		if (trigger)
-			para.mode = TY_TRIGGER_MODE_SLAVE;//失能触发模式
-		else
-			para.mode = TY_TRIGGER_MODE_OFF;//失能触发模式
+		if (trigger) {
+			LOGD("=== Enable trigger mode");
+			para.mode = TY_TRIGGER_MODE_SLAVE;
+		}
+		else {
+			LOGD("=== Disable trigger mode");
+			para.mode = TY_TRIGGER_MODE_OFF;
+		}
 		ASSERT_OK(TYSetStruct(cams[count].hDev, TY_COMPONENT_DEVICE, TY_STRUCT_TRIGGER_PARAM, &para, sizeof(para)));
 
 		//for network only
@@ -215,7 +212,6 @@ TUYANG_API int		ty_cameraSendSofTriggerSig(int idx)
 	return TYSendSoftTrigger(cams[idx].hDev);
 }
 
-//RGB图像校正:
 TUYANG_API void ty_cameraGetUndistortRGBImage(char* pRGB, int width, int height, int idx, char* pOut)
 {
 	TY_IMAGE_DATA src;
@@ -249,7 +245,6 @@ TUYANG_API void ty_cameraMapDepthImage2RGBCoordinate(unsigned short* depthIn, in
 		);
 }
 
-//获取深度校正参数:
 TUYANG_API int ty_cameraGetDepthCalibIntrinsicWidth(int idx)
 {
 	return depth_calib.at(idx).intrinsicWidth;
@@ -275,7 +270,6 @@ TUYANG_API void ty_cameraGetDepthCalibDistortion(int idx, float* fDistortion)
 	memcpy((void*)fDistortion, (void*)&depth_calib.at(idx).distortion, sizeof(TY_CAMERA_DISTORTION));
 }
 
-//获取RGB校正参数:
 TUYANG_API int  ty_cameraGetColorCalibIntrinsicWidth(int idx)
 {
 	return color_calib.at(idx).intrinsicWidth;
@@ -301,13 +295,11 @@ TUYANG_API void ty_cameraGetColorCalibDistortion(int idx, float* fDistortion)
 	memcpy((void*)fDistortion, (void*)&color_calib.at(idx).distortion, sizeof(TY_CAMERA_DISTORTION));
 }
 
-//获取连接相机数目:
 TUYANG_API int ty_cameraGetCnt(void)
 {
 	return cam_size;
 }
 
-//获取相机ID:
 TUYANG_API char* ty_cameraGetSN(int  idx)
 {
 	return cams[idx].sn;
@@ -400,8 +392,7 @@ TUYANG_API bool ty_camera_fetch_all_image(char* color, unsigned short* depth, in
 	return true;
 }
 
-//关闭相机:
-TUYANG_API bool ty_camera_close()//关闭所有设备
+TUYANG_API bool ty_camera_close()//
 {
 	for(uint32_t i = 0; i < cam_size; i++){
         ASSERT_OK( TYStopCapture(cams[i].hDev) );

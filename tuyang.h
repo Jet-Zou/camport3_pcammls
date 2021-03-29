@@ -26,33 +26,66 @@
 EXTERN_C TUYANG_API void ty_camera_test(char* szString);
 EXTERN_C TUYANG_API void ty_camera_test_int(int _interface);
 
+/// @brief  device init.
 EXTERN_C TUYANG_API int ty_camera_init(bool trigger);
 
 /// @brief  get 3d-camera device count.
 /// @retval percipio device count.
 EXTERN_C TUYANG_API int ty_cameraGetCnt(void);
 
-/// @brief  get 3d-camera sn number.
-/// @param  [in]		idx     device number.
+/// @brief  get 3d-camera device serial number.
+/// @param  [in]		idx     device index.
 /// @retval percipio device sn.
 EXTERN_C TUYANG_API char* ty_cameraGetSN(int  idx);
 
 /// @brief  get 3d-camera depth calib-para.
-/// @param  [in]		idx				device number.
-/// @retval percipio device depth calib-para.
+/// @param  [in]		idx				device index.
+/// @retval percipio device depth calib image width.
 EXTERN_C TUYANG_API int		ty_cameraGetDepthCalibIntrinsicWidth(int idx);
+
+/// @brief  get 3d-camera depth calib-para.
+/// @param  [in]		idx				device index.
+/// @retval percipio device depth calib image height.
 EXTERN_C TUYANG_API int		ty_cameraGetDepthCalibIntrinsicHeight(int idx);
+
+/// @brief  get 3d-camera depth calib-para.
+/// @param  [in]		idx				device index.
+/// @retval percipio device depth intrinsic calib para.
 EXTERN_C TUYANG_API void	ty_cameraGetDepthCalibIntrinsic(int idx, float* fIntrinsic);
+
+/// @brief  get 3d-camera depth calib-para.
+/// @param  [in]		idx				device index.
+/// @retval percipio device depth extrinsic calib para.
 EXTERN_C TUYANG_API void	ty_cameraGetDepthCalibExtrinsic(int idx, float* fExtrinsic);
+
+/// @brief  get 3d-camera depth calib-para.
+/// @param  [in]		idx				device index.
+/// @retval percipio device depth distortion calib para: 
 EXTERN_C TUYANG_API void	ty_cameraGetDepthCalibDistortion(int idx, float* fDistortion);
 
-/// @brief  get 3d-camera rgb calib-para.
-/// @param  [in]		idx				device number.
-/// @retval percipio device rgb calib-para.
+/// @brief  get 3d-camera color calib-para.
+/// @param  [in]		idx				device index.
+/// @retval percipio device color calib image width.
 EXTERN_C TUYANG_API int		ty_cameraGetColorCalibIntrinsicWidth(int idx);
+
+/// @brief  get 3d-camera color calib-para.
+/// @param  [in]		idx				device index.
+/// @retval percipio device color calib image height.
 EXTERN_C TUYANG_API int		ty_cameraGetColorCalibIntrinsicHeight(int idx);
+
+/// @brief  get 3d-camera color calib-para.
+/// @param  [in]		idx				device index.
+/// @retval percipio device color intrinsic calib-para.
 EXTERN_C TUYANG_API void	ty_cameraGetColorCalibIntrinsic(int idx, float* fIntrinsic);
+
+/// @brief  get 3d-camera color calib-para.
+/// @param  [in]		idx				device index.
+/// @retval percipio device color extrinsic calib-para.
 EXTERN_C TUYANG_API void	ty_cameraGetColorCalibExtrinsic(int idx, float* fExtrinsic);
+
+/// @brief  get 3d-camera color calib-para.
+/// @param  [in]		idx				device index.
+/// @retval percipio device color distortion calib-para.
 EXTERN_C TUYANG_API void	ty_cameraGetColorCalibDistortion(int idx, float* fDistortion);
 
 EXTERN_C TUYANG_API int		ty_cameraGetRGBImageWidth();
@@ -66,14 +99,11 @@ EXTERN_C TUYANG_API bool	ty_camera_fetch_rgb_image(char* color, int idx);
 EXTERN_C TUYANG_API bool	ty_camera_fetch_depth_image(unsigned short* depth, int idx);
 EXTERN_C TUYANG_API bool	ty_camera_fetch_all_image(char* color, unsigned short* depth, int idx);
 
-//EXTERN_C TUYANG_API void ty_cameraFun(char* color_temp, float* p3d_temp, int  idx);//int* depth_temp,
-//EXTERN_C TUYANG_API void ty_cameraFun2(char* color_temp, char* depth_temp, int idx);
-
 /// @brief Do rgb image undistortion
 /// @param  [in]	pRGB          Source rgb image data.
 /// @param  [in]    width         Source image width.
 /// @param  [in]    height        Source image height.
-/// @param  [in]    idx			  Device number.
+/// @param  [in]    idx			  Device index.
 /// @param  [out]   pOut		  Dest rgb image data.
 EXTERN_C TUYANG_API void ty_cameraGetUndistortRGBImage(char* pRGB, int width, int height, int idx, char* pOut);
 

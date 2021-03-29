@@ -1,13 +1,16 @@
 cmake_minimum_required(VERSION 3.12)
 
 project(percipio_cam)
+include(ExternalProject)
 
 set(CMAKE_CXX_STANDARD 14)
 
-set(CAMPORT_DIR "" CACHE  PATH "Percipio SDK Path")
+set(CAMPORT_DIR "D:\\camport3_master\\" CACHE  PATH "Percipio SDK Path")
 #set(CAMPORT_DIR "D:\\camport3\\" CACHE  PATH "Percipio SDK Path")
 #set(CAMPORT_DIR "/home/user/camport3" CACHE  PATH "Percipio SDK Path")
 set(CAMPORT_ARCH  CACHE STRING "Percipio SDK Arch")
+
+option(CSHARP_CAM_DEMO "Enable csharp demo." OFF)
 
 if ( (NOT EXISTS "${CAMPORT_DIR}") OR (NOT EXISTS "${CAMPORT_DIR}/include"))
 	message(FATAL_ERROR "need set CAMPORT_DIR to sdk directory")
@@ -65,3 +68,27 @@ add_definitions(-DTUYANG_EXPORTS)
 add_library(percipio_cam SHARED tuyang.cpp)
 
 target_link_libraries(percipio_cam tycam ${OpenCV_LIBS})
+
+if (CSHARP_CAM_DEMO)
+    ExternalProject_Add(csharp_demo
+	    SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/csharp"
+		BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/csharp_build"
+		DEPENDS 
+		    percipio_cam
+		CMAKE_ARGS 
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/install_cache
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+        -DCMAKE_STATIC_LINKER_FLAGS=${CMAKE_EXE_LINKER_FLAGS}
+        -DCMAKE_STATIC_LINKER_FLAGS_DEBUG=${CMAKE_EXE_LINKER_FLAGS_DEBUG}
+        -DCMAKE_STATIC_LINKER_FLAGS_RELEASE=${CMAKE_EXE_LINKER_FLAGS_RELEASE}
+    	-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+        -DCMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}
+        -DCMAKE_CXX_FLAGS_DEBUG=${CMAKE_CXX_FLAGS_DEBUG}
+        -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
+        -DCMAKE_C_FLAGS_DEBUG=${CMAKE_C_FLAGS_DEBUG}
+        -DCMAKE_C_FLAGS_RELEASE=${CMAKE_C_FLAGS_RELEASE} 
+    	-DCMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE=${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}
+		-DPCAM_LIB_SUPPORT_FILE_DIR=${PCAM_LIB_SUPPORT_FILE_DIR}
+	    )
+endif()
