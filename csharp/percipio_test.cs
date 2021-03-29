@@ -77,9 +77,13 @@ namespace PercipioCamDemo
         [DllImport("percipio_cam.dll", EntryPoint = "ty_cameraGetColorCalibDistortion", CallingConvention = CallingConvention.Cdecl)]
         public extern static void ty_cameraGetColorCalibDistortion(int idx, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] float[] fDistortion);
 
+        //ty_cameraSendSofTriggerSig:触发
+		[DllImport("percipio_cam.dll", EntryPoint = "ty_cameraSendSofTriggerSig", CallingConvention = CallingConvention.Cdecl)]
+        public extern static int ty_cameraSendSofTriggerSig(int idx);
+
         //ty_camera_fetch_all_image:获取彩色图像与深度图图像
         [DllImport("percipio_cam.dll", EntryPoint = "ty_camera_fetch_all_image", CallingConvention = CallingConvention.Cdecl)]
-        public extern static void ty_camera_fetch_all_image([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]  byte[] rgb, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]  ushort[] depth, int idx);
+        public extern static bool ty_camera_fetch_all_image([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]  byte[] rgb, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]  ushort[] depth, int idx);
 
         //ty_cameraMapDepthImage2RGBCoordinate:将深度图对齐至RGB坐标系
         [DllImport("percipio_cam.dll", EntryPoint = "ty_cameraMapDepthImage2RGBCoordinate", CallingConvention = CallingConvention.Cdecl)]
