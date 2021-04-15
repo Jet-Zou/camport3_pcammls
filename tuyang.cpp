@@ -237,7 +237,7 @@ TUYANG_API void ty_cameraMapDepthImage2RGBCoordinate(unsigned short* depthIn, in
 	TY_CAMERA_CALIB_INFO _color_calib = color_calib.at(idx);
 	ASSERT_OK(
 		TYMapDepthImageToColorCoordinate(
-		&_color_calib,
+		&_depth_calib,
 		src_width, src_height, depthIn,
 		&_color_calib,
 		dst_width, dst_height, depthOut
